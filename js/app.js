@@ -30,30 +30,10 @@ $(function() {
     listBoolean: true, // boolean value for list toggle
     settingsBoolean: true, // boolean value for setting toggle
     filterBoolean: Ember.computed.empty('filteredList'), // boolean value for handling no result
-    
+
     // set map size to fit window
     mapSize: Ember.observer('windowHeight', function() {
       $('#map').height($(window).height());
-    }),
-
-    // update the neighborhood
-    computedNeighborhood: Ember.observer('neighborhood', function() {
-      var context = this;
-      if (this.get('neighborhood') != '') {
-        if (venueMarkers.length > 0) {
-          removeVenueMarkers();
-        }
-        if (neighborhoodMarkers.length > 0) {
-          removeNeighborhoodMarker();          
-        }
-        if (this.get('neighborhood') === defaultNeighborhood) {
-          context.get('requestNeighborhood')(context.get('neighborhood'), context);
-        }
-        Ember.run.debounce(this, function() {
-          context.get('requestNeighborhood')(context.get('neighborhood'), context);
-        }, 1500);
-        this.set('keyword', '');
-      }
     }),
 
     // update list view based on search keyword
@@ -110,10 +90,6 @@ $(function() {
           context.get('topPicksList').forEach(function(topVenue) {
             createMarkers(topVenue.venue);
           });
-          /*
-          for (var i in self.topPicksList()) {
-            createMarkers(self.topPicksList()[i].venue);
-          }*/
 
           // change the map zoom level by suggested bounds
           var bounds = data.response.suggestedBounds;
@@ -160,6 +136,23 @@ $(function() {
       // setting toggle method. open/close setting menu
       settingsToggle: function() {
         this.toggleProperty('settingsBoolean');
+      },
+
+      updateNeighborhood: function() {
+        var context = this;
+        if (this.get('neighborhood') != '') {
+          if (venueMarkers.length > 0) {
+            removeVenueMarkers();
+          }
+          if (neighborhoodMarkers.length > 0) {
+            removeNeighborhoodMarker();          
+          }
+          if (this.get('neighborhood') === defaultNeighborhood) {
+            context.get('requestNeighborhood')(context.get('neighborhood'), context);
+          }
+          context.get('requestNeighborhood')(context.get('neighborhood'), context);
+          this.set('keyword', '');
+        }
       }
     }
   });
@@ -167,8 +160,11 @@ $(function() {
   // Initiate some functions in IndexController
   App.IndexRoute = Ember.Route.extend({
     setupController: function(controller, model) {
+      // initiate computed/observer methods in controller
       controller.set('neighborhood', defaultNeighborhood);
       controller.set('windowHeight', $(window).height());
+      // .send() calls action method in controller
+      controller.send('updateNeighborhood');
     }
   });
 

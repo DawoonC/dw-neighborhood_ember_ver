@@ -31,7 +31,9 @@
           <div class="settings-container">
             <div class="settings-box">
               <h4 class="settings-title">Current Neighborhood:</h4>
+              <form {{action "updateNeighborhood" on="submit"}}>
               {{input class="settings-area" value=neighborhood}}
+              </form>
             </div>
             <div class="pointy"></div>
           </div>
